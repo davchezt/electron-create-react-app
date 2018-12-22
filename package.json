@@ -59,10 +59,16 @@
     "asarUnpack": [
       "node_modules/node-notifier/vendor/**"
     ],
-    "extraResources": [{
-      "from": "node_modules/node-notifier/vendor",
-      "to": "app.asar.unpacked/node_modules/node-notifier/vendor"
-    }],
+    "extraResources": [
+      {
+        "from": "node_modules/node-notifier/vendor",
+        "to": "app.asar.unpacked/node_modules/node-notifier/vendor"
+      },
+      {
+        "from": "public/assets/img",
+        "to": "app.asar.unpacked/assets/img"
+      }
+    ],
     "directories": {
       "buildResources": "assets"
     }

@@ -3,6 +3,8 @@ import Electron from 'electron';
 import Notifier from 'node-notifier';
 import path from 'path';
 import fs from 'fs';
+
+import ImageNotif from './coulson.jpg';
 import logo from './logo.svg';
 import './App.css';
 
@@ -12,31 +14,47 @@ const { shell } = Electron;
 const { openExternal } = shell;
 const { app } = remote;
 
-const WindowsBalloon = require('node-notifier').WindowsBalloon;
-const WindowsToaster = require('node-notifier').WindowsToaster;
+const { WindowsToaster, WindowsBalloon } = Notifier;
 
-const Platform = "windows";
+const assetsLocation = process.env.NODE_ENV == "development" ?
+  path.resolve(path.join(__dirname, "../build/assets")) :
+  path.join(app.getAppPath().replace('app.asar', 'app.asar.unpacked/assets'));
 
 class App extends Component {
   constructor(props) {
     super(props);
+
+    //console.log("process.cwd()", process.cwd());
+    //console.log("app.getAppPath()", app.getAppPath().replace('app.asar', 'app.asar.unpacked'));
+    //console.log("process.execPath", process.execPath);
+    //console.log("process.env.PUBLIC_URL", process.env.PUBLIC_URL);
+    console.log(process.resourcesPath);
   }
   init() {
     ipcRenderer.on("harmony-url", (event, message) => {
+      if (message.length !== 0) {
+        if (message[0].length > 1) {
+          let urlPath = message[0].split(":/")[1];
+          urlPath = urlPath.toString().substring(1, urlPath.length - 1);
+          console.log("/" + urlPath);
+          let router = urlPath.split('/');
+          console.log(router);
+        }
+      }
+      
       console.log(message);
     });
   }
   componentWillMount() {
-    this.init();
     fs.readFile(path.join(app.getAppPath(), "build/file.txt"), 'utf-8', function(err, buf) {
       if (err) throw err;
       console.log(buf.toString());
     });
-    const notifierWindowsBalloon = new WindowsBalloon({
-      withFallback: false, // Try Windows Toast and Growl first?
-      customPath: path.join(app.getAppPath(), 'build/vendor/notifu/notifu.exe') // Relative/Absolute path if you want to use your fork of notifu
-    });
-    
+    //const notifierWindowsBalloon = new WindowsBalloon({
+    //  withFallback: false, // Try Windows Toast and Growl first?
+    //  customPath: path.join(app.getAppPath(), 'build/vendor/notifu/notifu.exe') // Relative/Absolute path if you want to use your fork of notifu
+    //});
+    const notifierWindowsBalloon = new WindowsBalloon();
     notifierWindowsBalloon.notify({
       title: "Harmony",
       message: "Testing Notification",
@@ -49,6 +67,7 @@ class App extends Component {
     });
   }
   componentDidMount() {
+    // console.log(assetsLocation);
     this.init();
     /*
     dialog.showMessageBox(null, { type: 'info', title: 'Wow', message: 'MessageBox testing...', buttons: ['Ok', 'Retry', 'Cancel'] }, (ev) => {
@@ -57,16 +76,16 @@ class App extends Component {
     });
     // dialog.showOpenDialog({ properties: ['openFile', 'openDirectory', 'multiSelections'] });
     */
-    let notifier = new WindowsToaster({
-      withFallback: false,
-      customPath: path.join(app.getAppPath(), 'build/vendor/snoreToast/SnoreToast.exe')
-    });
+    //let Notifier = new WindowsToaster({
+    //  withFallback: false,
+    //  customPath: path.join(app.getAppPath(), 'build/vendor/snoreToast/SnoreToast.exe')
+    //});
 
-    notifier.notify({
+    Notifier.notify({
       title: 'Harmony',
       message: 'Hello. This is a longer text\nWith "some" newlines.',
       wait: false,
-      icon: 'file://' + path.join(app.getAppPath(), 'build/coulson.jpg'),
+      icon: assetsLocation + "/img/coulson.jpg", //path.join(app.getAppPath().replace('app.asar', 'app.asar.unpacked'), 'assets/img/coulson.jpg'),
       sound: true
     }, function(err, data) {
       // Will also wait until notification is closed.
@@ -74,11 +93,11 @@ class App extends Component {
       console.log(err, data);
     });
 
-    notifier.on('timeout', function() {
+    Notifier.on('timeout', function() {
       console.log('notifier Timed out!');
     });
 
-    notifier.on('click', function() {
+    Notifier.on('click', function() {
       console.log('notifier Clicked!');
     });
   }
@@ -103,7 +122,9 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <p>
             Edit <code>src/App.js</code> and save to reload.
+            <img src={ImageNotif} alt="test" />
           </p>
+          <a className="App-link" href="harmony://anu">Anu</a>
           <a
             className="App-link"
             href="https://reactjs.org"

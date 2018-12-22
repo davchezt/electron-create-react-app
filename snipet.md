@@ -1,3 +1,9 @@
+# Path
+```js
+process.resourcesPath // exe file dir => ./resources/
+app.getAppPath() // exe file dir => ./app.asar/
+```
+
 # Execute Bash / Command
 ```js
 var child = require('child_process').execFile;
