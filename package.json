@@ -8,7 +8,7 @@
     "@craco/craco": "^3.2.3",
     "cross-env": "^5.2.0",
     "electron-is-dev": "^1.0.1",
-    "node-notifier": "git@github.com:davchezt/node-notifier.git",
+    "electron-node-notifier": "https://github.com/davchezt/electron-node-notifier.git",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-scripts": "2.1.1",

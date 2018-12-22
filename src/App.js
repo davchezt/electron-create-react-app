@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import Electron from 'electron';
-import Notifier from 'node-notifier';
+import Notifier from 'electron-node-notifier';
 import path from 'path';
 
-import ImageNotif from './coulson.jpg';
 import logo from './logo.svg';
 import './App.css';
 
@@ -15,13 +14,17 @@ const { app } = remote;
 const { WindowsBalloon } = Notifier;
 const notifierWindowsBalloon = new WindowsBalloon();
 
-const assetsLocation = process.env.NODE_ENV == "development" ?
-  path.resolve(path.join(__dirname, "../build/assets")) :
+const assetsLocation = process.env.NODE_ENV === "development" ?
+  path.resolve(path.join(__dirname, "../public/assets")) :
   path.join(app.getAppPath().replace('app.asar', 'app.asar.unpacked/assets'));
 
 class App extends Component {
   constructor(props) {
     super(props);
+	
+	this.state = {
+      inDevelopment: true
+	}
   }
 
   init() {
@@ -41,16 +44,28 @@ class App extends Component {
   }
 
   componentWillMount() {
-    
+    if (process.env.NODE_ENV !== "development") {
+	  this.setState({inDevelopment: false});
+	}
+	
     notifierWindowsBalloon.notify({
       title: "Harmony",
       message: "Testing Notification",
       sound: false,
-      time: 5000,
+      time: 10000,
       wait: false,
       type: 'info'
     }, function(error, response) {
-      console.log(response);
+      if (response) console.log(response);
+	  if (error) console.log(error);
+    });
+	
+	notifierWindowsBalloon.on('timeout', function() {
+      console.log('notifier Timed out!');
+    });
+
+    notifierWindowsBalloon.on('click', function() {
+      console.log('notifier Clicked!');
     });
   }
   componentDidMount() {
@@ -59,11 +74,13 @@ class App extends Component {
     Notifier.notify({
       title: 'Harmony',
       message: 'Hello. This is a longer text\nWith "some" newlines.',
+	  time: 10000,
       wait: false,
       icon: assetsLocation + "/img/coulson.jpg",
       sound: true
     }, function(err, data) {
-      console.log(err, data);
+      if (err) console.log(err);
+	  if (data) console.log(err);
     });
 
     Notifier.on('timeout', function() {
@@ -95,9 +112,10 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <p>
             Edit <code>src/App.js</code> and save to reload.
-            <img src={ImageNotif} alt="test" />
           </p>
-          <a className="App-link" href="harmony://test">test deep-link</a>
+		  {
+			!this.state.inDevelopment && <a className="App-link" href="harmony://test">test deep-link</a>
+		  }
           <a
             className="App-link"
             href="https://reactjs.org"
