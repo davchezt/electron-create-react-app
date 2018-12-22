@@ -13,7 +13,7 @@
 /dist
 
 # misc
-snipet.md
+yarn.lock
 .DS_Store
 .env.local
 .env.development.local
