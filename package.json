@@ -41,6 +41,10 @@
   },
   "main": "public/electron.js",
   "homepage": "./",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davchezt/electron-create-react-app.git"
+  },
   "build": {
     "appId": "com.militant.harmony",
     "protocols": {
