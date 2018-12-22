@@ -22,9 +22,9 @@ class App extends Component {
   constructor(props) {
     super(props);
 	
-	this.state = {
+	  this.state = {
       inDevelopment: true
-	}
+	  }
   }
 
   init() {
@@ -45,8 +45,8 @@ class App extends Component {
 
   componentWillMount() {
     if (process.env.NODE_ENV !== "development") {
-	  this.setState({inDevelopment: false});
-	}
+	    this.setState({inDevelopment: false});
+	  }
 	
     notifierWindowsBalloon.notify({
       title: "Harmony",
@@ -57,10 +57,10 @@ class App extends Component {
       type: 'info'
     }, function(error, response) {
       if (response) console.log(response);
-	  if (error) console.log(error);
+	    if (error) console.log(error);
     });
 	
-	notifierWindowsBalloon.on('timeout', function() {
+	  notifierWindowsBalloon.on('timeout', function() {
       console.log('notifier Timed out!');
     });
 
@@ -74,13 +74,13 @@ class App extends Component {
     Notifier.notify({
       title: 'Harmony',
       message: 'Hello. This is a longer text\nWith "some" newlines.',
-	  time: 10000,
+      time: 10000,
       wait: false,
       icon: assetsLocation + "/img/coulson.jpg",
       sound: true
     }, function(err, data) {
       if (err) console.log(err);
-	  if (data) console.log(err);
+	    if (data) console.log(err);
     });
 
     Notifier.on('timeout', function() {
@@ -113,9 +113,7 @@ class App extends Component {
           <p>
             Edit <code>src/App.js</code> and save to reload.
           </p>
-		  {
-			!this.state.inDevelopment && <a className="App-link" href="harmony://test">test deep-link</a>
-		  }
+          {!this.state.inDevelopment && <a className="App-link" href="harmony://test">test deep-link</a>}
           <a
             className="App-link"
             href="https://reactjs.org"
