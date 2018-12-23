@@ -15,7 +15,6 @@ let deeplinkingUrl
 function createWindow() {
   mainWindow = new BrowserWindow({width: 900, height: 680});
   mainWindow.loadURL(isDev ? "http://localhost:3000" : `file://${path.join(__dirname, "../build/index.html")}`);
-  mainWindow.webContents.openDevTools({mode:'undocked'});
 
   if (process.platform == 'win32') {
     deeplinkingUrl = process.argv.slice(1);
