@@ -1,6 +1,5 @@
 const electron = require("electron");
 const app = electron.app;
-const app = electron.app;
 const Menu = electron.Menu;
 const Tray = electron.Tray;
 
