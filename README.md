@@ -5,9 +5,9 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 * Windows notification using [node-notifier](https://github.com/davchezt/node-notifier)
 * Tray menu
 
-![Preview 1](https://raw.githubusercontent.com/davchezt/MSCaptcha/master/electron-create-react-app/deep-link.gif)
+![Preview 1](https://raw.githubusercontent.com/davchezt/electron-create-react-app/master/deep-link.gif)
 
-![Preview 2](https://raw.githubusercontent.com/davchezt/MSCaptcha/master/electron-create-react-app/tray-notif.gif)
+![Preview 2](https://raw.githubusercontent.com/davchezt/electron-create-react-app/master/tray-notif.gif)
 
 ## Install
 ```
