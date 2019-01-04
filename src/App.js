@@ -1,30 +1,33 @@
 import React, { Component } from 'react';
 import Electron from 'electron';
-import Notifier from 'electron-node-notifier';
-import path from 'path';
+import Store from 'electron-store';
+
+// import Notifier from 'electron-node-notifier';
+// import path from 'path';
 import { NavLink, Route, Link, HashRouter, Switch } from "react-router-dom";
 
 import logo from './logo.svg';
 import './App.css';
 
-const { ipcRenderer, remote } = Electron;
+// Helper
+import Logger from './Logger';
+import Api from './Api';
+import RaectLink from './components/Link';
+
+import About from './screen/About';
+import Dua from './screen/Dua';
+
+const store = new Store();
+const { ipcRenderer, /*remote*/ } = Electron;
 const { shell } = Electron;
 const { openExternal } = shell;
-const { app } = remote;
+//const { app } = remote;
 
-const { WindowsBalloon } = Notifier;
-const notifierWindowsBalloon = new WindowsBalloon();
+//const { WindowsBalloon } = Notifier;
+//const notifierWindowsBalloon = new WindowsBalloon();
 
-const assetsLocation = process.env.NODE_ENV === "development" ?
-  path.resolve(path.join(__dirname, "../public/assets")) :
-  path.join(app.getAppPath().replace('app.asar', 'app.asar.unpacked/assets'));
+//const assetsLocation = process.env.NODE_ENV === "development" ? path.resolve(path.join(__dirname, "../public/assets")) : path.join(app.getAppPath().replace('app.asar', 'app.asar.unpacked/assets'));
 
-const About = () => (
-  <div>
-    <h2>About</h2>
-    <Link to="/">Home</Link>
-  </div>
-);
 const Users = () => (
   <div>
     <h2>Users</h2>
@@ -32,34 +35,94 @@ const Users = () => (
   </div>
 );
 
+
+
 class App extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      inDevelopment: true
+      inDevelopment: true,
+      clientToken: null,
+      clientCredential: null
     }
+    this.openLink = this.openLink.bind(this);
   }
 
   init() {
+    Api.get('http://localhost:8080/products', (data) => {
+      Logger.json(data)
+    })
+    
     ipcRenderer.on("harmony-url", (event, message) => {
       if (message.length !== 0) {
         if (message[0].length > 1) {
           let urlPath = message[0].split(":/")[1];
           urlPath = urlPath.toString().substring(0, urlPath.length - 1);
-          console.log(urlPath);
+          // console.log(urlPath);
           window.location.hash = urlPath;
+          if (typeof(window.history.pushState) == 'function') {
+            window.history.pushState(null, '', '#' + urlPath);
+            console.log('history')
+          } else {
+            window.location.hash = urlPath;
+            console.log('hash')
+          }
+          window.history.go(window.history.length);
+          window.location.replace(window.location.hash.replace(urlPath, urlPath));
         }
-        console.log(event)
+        // console.log(event)
       }
-      console.log(message);
+      // console.log(message);
+      // ipcRenderer.removeAllListeners();
     });
   }
 
   componentWillMount() {
+    if (store.get('credential') === undefined) {
+      store.set('credential.email', 'davchezt@gmail.com');
+      store.set('credential.password', '4Bahagia4');
+    }
+    else {
+      this.setState({ clientCredential: store.get('credential') }, () => {
+        Logger.log('credential updated to: ' + JSON.stringify(this.state.clientCredential));
+        if (store.get('clientToken') === undefined) {
+          Api.auth('http://localhost:8080/user/login', this.state.clientCredential, (data) => {
+            let object = JSON.parse(data);
+            if (object.token) {
+              store.set('clientToken', object.token);
+            }
+          }, true)        
+        }
+      });
+    }
+
+    if (store.get('clientToken')) {
+      this.setState({ clientToken: store.get('clientToken') }, () => {
+        Logger.log('token updated to: ' + this.state.clientToken);
+        Api.patch('http://localhost:8080/products/5c2d33667d5b1e0d648d6747', this.state.clientToken, { name: "Foto Saya I", price: "123456789" }, (data) => {
+          Logger.json(data);
+        });
+      });
+    }
+
     if (process.env.NODE_ENV !== "development") {
       this.setState({ inDevelopment: false });
     }
+    
+    /*
+    Api.put('http://localhost/test.php', this.state.clientToken, { "name": "Foto Saya I", "price": "4000" }, (data) => {
+      Logger.info(JSON.parse(data))
+    }, true)
+
+    Api.patch('http://localhost:8080/products/5c2d33667d5b1e0d648d6747', this.state.clientToken, { "name": "Foto Saya I", "price": "4000" }, (data) => {
+      Logger.json(data);
+    });
+
+    Api.del('http://localhost:8080/products/5c2d33667d5b1e0d648d6747', this.state.clientToken, { "name": "Foto Saya I", "price": "4000" }, (data) => {
+      Logger.info(data)
+    }, true)
+    */
     /*
     notifierWindowsBalloon.notify({
       title: "Harmony",
@@ -82,6 +145,7 @@ class App extends Component {
     });
     */
   }
+
   componentDidMount() {
     this.init();
     /*
@@ -115,11 +179,13 @@ class App extends Component {
           throw err;
         }
         shell.beep();
-        console.log("visit: ", link);
+        Logger.log("visit: " + link);
+        Logger.info(this.state.clientToken);
       })
       event.preventDefault();
     }
   }
+
   render() {
     return (
       <div style={styles}>
@@ -131,10 +197,12 @@ class App extends Component {
                   <img src={logo} className="App-logo" alt="logo" />
                   <p>
                     Edit <code>src/App.js</code> and save to reload.<br />
-                    <NavLink exact to="/users" activeClassName="selected">Users</NavLink>
+                    <NavLink exact to="/about" activeClassName="selected">About</NavLink>
+                    <br />
+                    <NavLink exact to="/dua" activeClassName="selected">Dua</NavLink>
                   </p>
                   {!this.state.inDevelopment && <a className="App-link" href="harmony://about">test deep-link</a>}
-                  <a
+                  <RaectLink
                     className="App-link"
                     href="https://reactjs.org"
                     target="_blank"
@@ -142,18 +210,13 @@ class App extends Component {
                     onClick={this.openLink}
                   >
                     Learn React
-                  </a>
+                  </RaectLink>
                 </header>
               </div>
             )} />
             <Route path="/about" component={About} />
             <Route path="/users" component={Users} />
-            <Route path="/dua" component={() => (
-              <div>
-                <h2>DUA</h2>
-                <Link to="/">Home</Link>
-              </div>
-            )} />
+            <Route path="/dua" component={Dua} />
             <Route component={() => (
               <div>
                 <h1>404</h1>

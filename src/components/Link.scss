@@ -1,0 +1,9 @@
+.Link {
+  position: relative;
+
+  &:before {
+    content: '⚛️';
+    position: absolute;
+    right: -1.5em;
+  }
+}

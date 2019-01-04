@@ -12,8 +12,14 @@ const isDev = require("electron-is-dev");
 let mainWindow;
 let deeplinkingUrl
 
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true; // remove anoying log warning 😎
+
 function createWindow() {
-  mainWindow = new BrowserWindow({width: 900, height: 680});
+  mainWindow = new BrowserWindow({
+    width: 900,
+    height: 680,
+    webPreferences: { }
+  });
   mainWindow.loadURL(isDev ? "http://localhost:3000" : `file://${path.join(__dirname, "../build/index.html")}`);
 
   if (process.platform == 'win32') {
@@ -67,6 +73,14 @@ if (gotTheLock) {
         if (mainWindow) mainWindow.webContents.openDevTools({mode:'undocked'});
       }},
       { type: 'separator' },
+      { label: 'Users', type: 'normal', click: () => {
+        deeplinkingUrl = ["harmony://users/"];
+        if (mainWindow) {
+          mainWindow.webContents.send("harmony-url", deeplinkingUrl);
+          focusWindow();
+        }
+        logEverywhere("open-url: " + deeplinkingUrl);
+      }},
       { label: 'Dua', type: 'normal', click: () => {
         deeplinkingUrl = ["harmony://dua/"];
         if (mainWindow) {
@@ -78,6 +92,10 @@ if (gotTheLock) {
       { label: 'Item 1', type: 'radio', checked: true },
       { label: 'Item 2', type: 'radio' },
       { label: '', type: 'separator' },
+      { label: 'Restart', type: 'normal', click: (ev) => {
+        app.relaunch();
+        app.exit(0);
+      }},
       { label: 'Quit', type: 'normal', click: (ev) => {
         app.quit();
       }}
